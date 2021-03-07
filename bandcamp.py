@@ -9,9 +9,10 @@ import time
 
 
 class Band:
-    def __init__(self, band_id, band_name=""):
+    def __init__(self, band_id, band_name="", band_url=""):
         self.band_name = band_name
         self.band_id = str(band_id)
+        self.band_url = band_url
 
     def __eq__(self, other):
         if type(other) is type(self):
@@ -24,10 +25,11 @@ class Band:
 
 
 class Album:
-    def __init__(self, album_id, album_name, art_id):
+    def __init__(self, album_id, album_name, album_url, art_id):
         self.album_name = album_name
         self.art_id = art_id
         self.album_id = album_id
+        self.album_url = album_url
 
     def get_art_img(self, quality=9):
         return "https://f4.bcbits.com/img/a0{art_id}_{quality}.jpg".format(art_id=self.art_id, quality=quality)
@@ -104,8 +106,9 @@ class Bandcamp:
         items = json.loads(x.text)['items']
         bands = {}
         for item in items:
-            album = Album(album_id=item['item_id'], album_name=item['item_title'], art_id=item['item_art_id'])
-            band = Band(band_id=item['band_id'], band_name=item['band_name'])
+            album = Album(album_id=item['item_id'], album_name=item['item_title'], art_id=item['item_art_id'],
+                          album_url=item['item_url'])
+            band = Band(band_id=item['band_id'], band_name=item['band_name'], band_url=item['band_url'])
             if band not in bands:
                 bands[band] = {}
             bands[band].update({album: [None]})
