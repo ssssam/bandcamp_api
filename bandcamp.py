@@ -25,11 +25,14 @@ class Band:
 
 
 class Album:
-    def __init__(self, album_id, album_name, album_url, art_id):
+    def __init__(self, album_id, album_name, album_url, art_id,
+                 band_name=None, band_url=None):
         self.album_name = album_name
         self.art_id = art_id
         self.album_id = album_id
         self.album_url = album_url
+        self.band_name = band_name
+        self.band_url = band_url
 
     def get_art_img(self, quality=9):
         return "https://f4.bcbits.com/img/a0{art_id}_{quality}.jpg".format(art_id=self.art_id, quality=quality)
@@ -125,7 +128,11 @@ class Bandcamp:
         for track in player_data['tracks']:
             track_list.append(
                 Track(track['title'], track['file']['mp3-128'], track['duration'], number=track['tracknum'] + 1))
-        album = Album(album_id, player_data['album_title'], player_data['album_art_id'])
+        album = Album(
+            album_id, player_data['album_title'], player_data['linkback'],
+            player_data['album_art_id'], player_data['artist'],
+            player_data['band_url']
+        )
         return album, track_list
 
     @staticmethod
