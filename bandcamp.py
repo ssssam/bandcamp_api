@@ -59,11 +59,11 @@ class _DataBlobParser(HTMLParser):
 class _PlayerDataParser(HTMLParser):
     player_data = None
 
-    def handle_data(self, data):
-        if "playerdata" in data:
-            end = data.index('};') + 1
-            player_data = data[26:end]
-            self.player_data = json.loads(player_data)
+    def handle_starttag(self, data, attrs):
+        for attr in attrs:
+            if attr[0] == "data-player-data":
+                data_html = attr[1]
+                self.player_data = json.loads(data_html)
 
 
 class Bandcamp:
