@@ -66,6 +66,14 @@ class _PlayerDataParser(HTMLParser):
                 self.player_data = json.loads(data_html)
 
 
+class BandcampAPIError(Exception):
+    pass
+
+
+class EmbeddedPlayerUnavailable(BandcampAPIError):
+    pass
+
+
 class Bandcamp:
 
     def __init__(self, user_name):
@@ -124,10 +132,16 @@ class Bandcamp:
         content = request.text
         parser.feed(content)
         player_data = parser.player_data
+        if player_data is None:
+            raise EmbeddedPlayerUnavailable(f"No player data provided for {album_id}")
         track_list = []
         for track in player_data['tracks']:
+            if 'file' in track and track['file'] is not None:
+                track_file = track['file'].get('mp3-128')
+            else:
+                track_file = None
             track_list.append(
-                Track(track['title'], track['file']['mp3-128'], track['duration'], number=track['tracknum'] + 1))
+                Track(track['title'], track_file, track['duration'], number=track['tracknum'] + 1))
         album = Album(
             album_id, player_data['album_title'], player_data['linkback'],
             player_data['album_art_id'], player_data['artist'],
