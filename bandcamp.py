@@ -108,13 +108,7 @@ class Bandcamp:
     def get_subgenres(self):
         return self._get_data_blob()['signup_params']['subgenres']
 
-    def get_collection(self, fan_id, count=1000):
-        url = "https://bandcamp.com/api/fancollection/1/collection_items"
-        token = self._get_token()
-        body = '{{"fan_id": "{fan_id}", "older_than_token": "{token}", "count":"{count}"}}' \
-            .format(fan_id=fan_id, token=token, count=count)
-        x = requests.post(url, data=body)
-        items = json.loads(x.text)['items']
+    def _collate_collection_items(self, items):
         bands = {}
         for item in items:
             album = Album(album_id=item['item_id'], album_name=item['item_title'], art_id=item['item_art_id'],
@@ -124,6 +118,24 @@ class Bandcamp:
                 bands[band] = {}
             bands[band].update({album: [None]})
         return bands
+
+    def get_collection(self, fan_id, count=1000):
+        url = "https://bandcamp.com/api/fancollection/1/collection_items"
+        token = self._get_token()
+        body = '{{"fan_id": "{fan_id}", "older_than_token": "{token}", "count":"{count}"}}' \
+            .format(fan_id=fan_id, token=token, count=count)
+        x = requests.post(url, data=body)
+        items = json.loads(x.text)['items']
+        return self._collate_collection_items(items)
+
+    def get_wishlist(self, fan_id, count=1000):
+        url = "https://bandcamp.com/api/fancollection/1/wishlist_items"
+        token = self._get_token()
+        body = '{{"fan_id": "{fan_id}", "older_than_token": "{token}", "count":"{count}"}}' \
+            .format(fan_id=fan_id, token=token, count=count)
+        x = requests.post(url, data=body)
+        items = json.loads(x.text)['items']
+        return self._collate_collection_items(items)
 
     def get_album(self, album_id):
         url = "https://bandcamp.com/EmbeddedPlayer/album={album_id}".format(album_id=album_id)
